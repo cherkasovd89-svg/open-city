@@ -1,0 +1,44 @@
+; Enchanted Vale — Android Metroidvania
+config_version=5
+
+[application]
+config/name="Enchanted Vale"
+run/main_scene="res://scenes/main.tscn"
+config/features=PackedStringArray("4.3", "GL Compatibility")
+config/description="A hand-crafted fantasy 2D metroidvania for Android."
+
+[display]
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/window_width_override=1280
+window/size/window_height_override=720
+window/stretch/mode="canvas_items"
+window/handheld/orientation=1
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/default_filters/use_nearest_mipmap_filter=false
+environment/defaults/default_clear_color=Color(0.035, 0.055, 0.09, 1)
+
+[input]
+move_left={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"physical_keycode":65), Object(InputEventKey,"physical_keycode":4194311), Object(InputEventJoypadButton,"button_index":13)]
+}
+move_right={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"physical_keycode":68), Object(InputEventKey,"physical_keycode":4194313), Object(InputEventJoypadButton,"button_index":14)]
+}
+jump={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"physical_keycode":32), Object(InputEventJoypadButton,"button_index":0)]
+}
+attack={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"physical_keycode":74), Object(InputEventJoypadButton,"button_index":2)]
+}
+dodge={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"physical_keycode":75), Object(InputEventJoypadButton,"button_index":1)]
+}
