@@ -53,18 +53,20 @@ func _build_world() -> void:
     # Ruined stonework, luminous plants and mushrooms mark points of interest.
     _make_prop("ruin", 2685.0, -370.0, 1, -1)
     _make_prop("ruin", 4630.0, 0.0, 2, -1)
-    for data in [
-        [310.0, 0.0, 0], [690.0, -180.0, 1], [1030.0, 0.0, 2],
-        [1510.0, -210.0, 3], [1900.0, 0.0, 4], [2410.0, -190.0, 5],
-        [2820.0, -370.0, 6], [3400.0, -230.0, 7], [3890.0, -360.0, 8],
-        [4290.0, 0.0, 9], [4540.0, -190.0, 10], [4990.0, 0.0, 11]
-    ]:
-        _make_prop("mushroom", float(data[0]), float(data[1]) - 2.0, int(data[2]), 1)
-    for data in [
-        [820.0, -350.0, 0], [1640.0, 0.0, 1], [2500.0, -190.0, 2],
-        [3520.0, 0.0, 3], [4160.0, 0.0, 4], [4800.0, 0.0, 5]
-    ]:
-        _make_prop("crystal", float(data[0]), float(data[1]), int(data[2]), 1)
+    var mushroom_points: Array[Vector3] = [
+        Vector3(310.0, 0.0, 0), Vector3(690.0, -180.0, 1), Vector3(1030.0, 0.0, 2),
+        Vector3(1510.0, -210.0, 3), Vector3(1900.0, 0.0, 4), Vector3(2410.0, -190.0, 5),
+        Vector3(2820.0, -370.0, 6), Vector3(3400.0, -230.0, 7), Vector3(3890.0, -360.0, 8),
+        Vector3(4290.0, 0.0, 9), Vector3(4540.0, -190.0, 10), Vector3(4990.0, 0.0, 11)
+    ]
+    for point in mushroom_points:
+        _make_prop("mushroom", point.x, point.y - 2.0, int(point.z), 1)
+    var crystal_points: Array[Vector3] = [
+        Vector3(820.0, -350.0, 0), Vector3(1640.0, 0.0, 1), Vector3(2500.0, -190.0, 2),
+        Vector3(3520.0, 0.0, 3), Vector3(4160.0, 0.0, 4), Vector3(4800.0, 0.0, 5)
+    ]
+    for point in crystal_points:
+        _make_prop("crystal", point.x, point.y, int(point.z), 1)
     for i in range(42):
         var x := float((i * 127) % 5200)
         _make_prop("grass", x, 0.0, i, 1)
