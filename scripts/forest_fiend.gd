@@ -13,6 +13,7 @@ var home_x := 0.0
 var patrol_phase := 0.0
 var attack_cooldown := 0.0
 var hurt_flash := 0.0
+var freeze_timer := 0.0
 var death_timer := -1.0
 var anim_time := 0.0
 var hero: Node2D
@@ -35,6 +36,7 @@ func _physics_process(delta: float) -> void:
     anim_time += delta
     attack_cooldown = maxf(0.0, attack_cooldown - delta)
     hurt_flash = maxf(0.0, hurt_flash - delta)
+    freeze_timer = maxf(0.0, freeze_timer - delta)
 
     if death_timer >= 0.0:
         death_timer += delta
@@ -54,7 +56,9 @@ func _physics_process(delta: float) -> void:
     if is_instance_valid(hero):
         distance = global_position.distance_to(hero.global_position)
 
-    if distance < 340.0 and is_instance_valid(hero):
+    if freeze_timer > 0.0:
+        velocity.x = move_toward(velocity.x, 0.0, 900.0 * delta)
+    elif distance < 340.0 and is_instance_valid(hero):
         facing = 1 if hero.global_position.x > global_position.x else -1
         if distance > 48.0:
             velocity.x = move_toward(velocity.x, facing * CHASE_SPEED, 650.0 * delta)
@@ -73,6 +77,11 @@ func _physics_process(delta: float) -> void:
         velocity.y += GRAVITY * delta
     move_and_slide()
     queue_redraw()
+
+func apply_freeze(duration: float) -> void:
+    if death_timer < 0.0:
+        freeze_timer = maxf(freeze_timer, duration)
+        hurt_flash = maxf(hurt_flash, 0.12)
 
 func take_damage(amount: int = 1) -> void:
     if death_timer >= 0.0:
@@ -112,6 +121,11 @@ func _draw() -> void:
     draw_circle(Vector2(6,-48),2.8,Color("#ffd46e",fade))
     draw_circle(Vector2(-4,-48),2.2,Color("#ffd46e",fade))
     draw_line(Vector2(-5,-39),Vector2(7,-39),Color("#442638",fade),2.0,true)
+    if freeze_timer > 0.0 and death_timer < 0.0:
+        draw_arc(Vector2(0,-28),25.0,0.0,TAU,24,Color("#9ceeff",0.9),3.0,true)
+        draw_line(Vector2(-19,-12),Vector2(19,-12),Color("#b9f6ff",0.8),2.0,true)
+        draw_circle(Vector2(-17,-60),2.5,Color("#d9fbff",0.95))
+        draw_circle(Vector2(18,-57),2.5,Color("#d9fbff",0.95))
     # health pip bar
     if health < 3 and death_timer < 0.0:
         for i in range(3):
