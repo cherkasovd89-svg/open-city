@@ -55,14 +55,14 @@ func _platform(x: float, width: float, y: float) -> void:
     shape_node.position.y = 35
     body.add_child(shape_node)
     add_child(body)
-    var art: Node2D = WorldArtScript.new()
+    var art: WorldArt = WorldArtScript.new()
     art.kind = "platform"
     art.width = width
     art.position = Vector2(x, y)
     add_child(art)
 
 func _make_enemy(x: float, y: float) -> void:
-    var enemy: Node2D = WorldArtScript.new()
+    var enemy: WorldArt = WorldArtScript.new()
     enemy.kind = "enemy"
     enemy.position = Vector2(x,y)
     add_child(enemy)
