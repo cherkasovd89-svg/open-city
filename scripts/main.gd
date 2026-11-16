@@ -3,6 +3,7 @@ extends Node2D
 const HeroSceneScript = preload("res://scripts/player.gd")
 const ControlsScript = preload("res://scripts/touch_controls.gd")
 const WorldArtScript = preload("res://scripts/world_art.gd")
+const ForestFiendScript = preload("res://scripts/forest_fiend.gd")
 
 var hero: Hero
 var ui: CanvasLayer
@@ -62,8 +63,7 @@ func _platform(x: float, width: float, y: float) -> void:
     add_child(art)
 
 func _make_enemy(x: float, y: float) -> void:
-    var enemy: WorldArt = WorldArtScript.new()
-    enemy.kind = "enemy"
+    var enemy: ForestFiend = ForestFiendScript.new()
     enemy.position = Vector2(x,y)
     add_child(enemy)
     enemies.append(enemy)
@@ -88,7 +88,7 @@ func _build_hud() -> void:
     magic_label.position = Vector2(28,88)
     magic_label.add_theme_font_size_override("font_size", 14)
     magic_label.add_theme_color_override("font_color", Color("#8bdcff"))
-    magic_label.text = "ARCANE BOLT  •  STAFF OF THE BLUE STAR"
+    magic_label.text = "ARCANE BOLT  •  3 HITS TO DEFEAT A FOREST FIEND"
     ui.add_child(magic_label)
 
 func _update_health(value: int) -> void:
