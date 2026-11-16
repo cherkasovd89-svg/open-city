@@ -42,7 +42,7 @@ func _draw_tree() -> void:
         var x := float((i * 47 + variant * 29) % 150) - 75.0
         var y := -170.0 - float((i * 31 + variant * 17) % 125)
         var radius := 35.0 + float((i * 13 + variant) % 22)
-        var leaf := [Color("#294b47"), Color("#31584b"), Color("#3c624d"), Color("#456b53")][i % 4]
+        var leaf: Color = [Color("#294b47"), Color("#31584b"), Color("#3c624d"), Color("#456b53")][i % 4]
         draw_circle(Vector2(x, y), radius, leaf)
         draw_circle(Vector2(x - radius * 0.25, y - radius * 0.24), radius * 0.42, leaf.lightened(0.12))
     draw_set_transform(Vector2.ZERO)
