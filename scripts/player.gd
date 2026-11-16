@@ -19,6 +19,7 @@ var invulnerable := 0.0
 var anim_time := 0.0
 var was_airborne := false
 var spell_orbs: Array[Dictionary] = []
+var impact_bursts: Array[Dictionary] = []
 
 func _ready() -> void:
     collision_layer = 1
@@ -82,11 +83,31 @@ func _physics_process(delta: float) -> void:
     for i in range(spell_orbs.size() - 1, -1, -1):
         var orb: Dictionary = spell_orbs[i]
         var orb_pos: Vector2 = orb["pos"]
-        orb["pos"] = orb_pos + Vector2(float(orb["dir"]) * 760.0 * delta, 0.0)
+        orb_pos += Vector2(float(orb["dir"]) * 760.0 * delta, 0.0)
+        orb["pos"] = orb_pos
         orb["life"] = float(orb["life"]) - delta
-        spell_orbs[i] = orb
-        if float(orb["life"]) <= 0.0:
+        var hit_enemy := false
+        var world_pos := global_position + orb_pos
+        for target in get_tree().get_nodes_in_group("mage_enemies"):
+            if not is_instance_valid(target) or not target.has_method("take_damage"):
+                continue
+            var target_pos: Vector2 = target.global_position + Vector2(0,-27)
+            if world_pos.distance_to(target_pos) < 30.0:
+                target.take_damage(1)
+                impact_bursts.append({"pos": orb_pos, "life": 0.24})
+                hit_enemy = true
+                break
+        if hit_enemy or float(orb["life"]) <= 0.0:
             spell_orbs.remove_at(i)
+        else:
+            spell_orbs[i] = orb
+
+    for i in range(impact_bursts.size() - 1, -1, -1):
+        var burst: Dictionary = impact_bursts[i]
+        burst["life"] = float(burst["life"]) - delta
+        impact_bursts[i] = burst
+        if float(burst["life"]) <= 0.0:
+            impact_bursts.remove_at(i)
 
     move_and_slide()
     queue_redraw()
@@ -183,6 +204,17 @@ func _draw() -> void:
         draw_circle(p,5.5,Color(0.38,0.83,1.0,a))
         draw_circle(p,2.3,Color(0.94,1.0,1.0,a))
         draw_arc(p,13.0,phase,phase+4.0,16,Color(0.55,0.84,1.0,0.9*a),1.8,true)
+
+    # impact sparks when an arcane bolt connects
+    for burst in impact_bursts:
+        var bp: Vector2 = burst["pos"]
+        var progress := 1.0 - float(burst["life"]) / 0.24
+        var radius := 7.0 + progress * 24.0
+        draw_arc(bp,radius,0.0,TAU,20,Color(0.55,0.88,1.0,1.0-progress),2.5,true)
+        for spark in range(6):
+            var angle := float(spark) * TAU / 6.0 + progress * 1.8
+            var point := bp + Vector2(cos(angle),sin(angle)) * radius
+            draw_circle(point,2.2*(1.0-progress),Color("#b8f4ff",1.0-progress))
 
     # brief cast flash and ground rune
     if cast_timer > 0.0:
