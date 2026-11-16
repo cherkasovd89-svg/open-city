@@ -14,12 +14,15 @@ var facing := 1
 var health := 5
 var cast_timer := 0.0
 var cast_cooldown := 0.0
+var frost_cooldown := 0.0
+var nova_cooldown := 0.0
 var dodge_timer := 0.0
 var invulnerable := 0.0
 var anim_time := 0.0
 var was_airborne := false
 var spell_orbs: Array[Dictionary] = []
 var impact_bursts: Array[Dictionary] = []
+var nova_bursts: Array[Dictionary] = []
 
 func _ready() -> void:
     collision_layer = 1
@@ -47,6 +50,8 @@ func _physics_process(delta: float) -> void:
     anim_time += delta
     cast_timer = maxf(0.0, cast_timer - delta)
     cast_cooldown = maxf(0.0, cast_cooldown - delta)
+    frost_cooldown = maxf(0.0, frost_cooldown - delta)
+    nova_cooldown = maxf(0.0, nova_cooldown - delta)
     dodge_timer = maxf(0.0, dodge_timer - delta)
     invulnerable = maxf(0.0, invulnerable - delta)
 
@@ -70,6 +75,10 @@ func _physics_process(delta: float) -> void:
 
     if Input.is_action_just_pressed("attack") and cast_cooldown <= 0.0:
         _cast_spell()
+    if Input.is_action_just_pressed("frost_spell") and frost_cooldown <= 0.0:
+        _cast_frost()
+    if Input.is_action_just_pressed("nova_spell") and nova_cooldown <= 0.0:
+        _cast_nova()
     if Input.is_action_just_pressed("dodge") and dodge_timer <= 0.0:
         dodge_timer = 0.30
         invulnerable = 0.38
@@ -93,14 +102,27 @@ func _physics_process(delta: float) -> void:
                 continue
             var target_pos: Vector2 = target.global_position + Vector2(0,-27)
             if world_pos.distance_to(target_pos) < 30.0:
-                target.take_damage(1)
-                impact_bursts.append({"pos": orb_pos, "life": 0.24})
+                if String(orb.get("kind", "arcane")) == "frost":
+                    target.take_damage(1)
+                    if target.has_method("apply_freeze"):
+                        target.apply_freeze(2.0)
+                    impact_bursts.append({"pos": orb_pos, "life": 0.42, "kind": "frost"})
+                else:
+                    target.take_damage(1)
+                    impact_bursts.append({"pos": orb_pos, "life": 0.24, "kind": "arcane"})
                 hit_enemy = true
                 break
         if hit_enemy or float(orb["life"]) <= 0.0:
             spell_orbs.remove_at(i)
         else:
             spell_orbs[i] = orb
+
+    for i in range(nova_bursts.size() - 1, -1, -1):
+        var nova: Dictionary = nova_bursts[i]
+        nova["life"] = float(nova["life"]) - delta
+        nova_bursts[i] = nova
+        if float(nova["life"]) <= 0.0:
+            nova_bursts.remove_at(i)
 
     for i in range(impact_bursts.size() - 1, -1, -1):
         var burst: Dictionary = impact_bursts[i]
@@ -117,6 +139,23 @@ func _cast_spell() -> void:
     cast_cooldown = 0.48
     var origin := Vector2(35.0 * facing, -48.0)
     spell_orbs.append({"pos": origin, "dir": facing, "life": 1.15, "phase": randf() * TAU})
+
+func _cast_frost() -> void:
+    frost_cooldown = 2.2
+    cast_timer = 0.28
+    spell_orbs.append({"pos": Vector2(35.0 * facing, -48.0), "dir": facing, "life": 1.05, "phase": randf() * TAU, "kind": "frost"})
+
+func _cast_nova() -> void:
+    nova_cooldown = 5.5
+    var center := Vector2(145.0 * facing, -35.0)
+    nova_bursts.append({"pos": center, "life": 0.62})
+    for target in get_tree().get_nodes_in_group("mage_enemies"):
+        if not is_instance_valid(target) or not target.has_method("take_damage"):
+            continue
+        var target_pos: Vector2 = target.global_position - global_position
+        if target_pos.distance_to(center) <= 175.0:
+            target.take_damage(2)
+            impact_bursts.append({"pos": target_pos, "life": 0.30, "kind": "nova"})
 
 func take_damage(amount: int = 1) -> void:
     if invulnerable > 0.0:
@@ -195,27 +234,39 @@ func _draw() -> void:
         var particle := Vector2(25,-87) + Vector2(cos(angle),sin(angle)) * 15.0
         draw_circle(particle,1.7,Color(0.55,0.88,1.0,0.8*a))
 
-    # traveling arcane bolts, with a bright core and trailing runes
+    # Arcane and frost projectiles have distinct silhouettes and colors.
     for orb in spell_orbs:
         var p: Vector2 = orb["pos"]
         var phase := float(orb["phase"]) + anim_time * 10.0
-        draw_line(p - Vector2(27,0),p,Color(0.15,0.58,1.0,0.42*a),9.0,true)
-        draw_circle(p,10.0,Color(0.13,0.55,1.0,0.22*a))
-        draw_circle(p,5.5,Color(0.38,0.83,1.0,a))
-        draw_circle(p,2.3,Color(0.94,1.0,1.0,a))
-        draw_arc(p,13.0,phase,phase+4.0,16,Color(0.55,0.84,1.0,0.9*a),1.8,true)
+        var is_frost := String(orb.get("kind", "arcane")) == "frost"
+        var core := Color("#baf7ff") if is_frost else Color("#62cfff")
+        var glow_color := Color("#4de5ff") if is_frost else Color("#287fff")
+        draw_line(p - Vector2(27,0),p,Color(glow_color,0.42*a),9.0,true)
+        draw_circle(p,12.0,Color(glow_color,0.22*a))
+        draw_circle(p,6.0,Color(core,a))
+        draw_colored_polygon(PackedVector2Array([p+Vector2(0,-9),p+Vector2(5,0),p+Vector2(0,9),p+Vector2(-5,0)]),Color("#f4ffff",a))
+        draw_arc(p,13.0,phase,phase+4.0,16,Color(core,0.9*a),1.8,true)
 
     # impact sparks when an arcane bolt connects
     for burst in impact_bursts:
         var bp: Vector2 = burst["pos"]
-        var progress := 1.0 - float(burst["life"]) / 0.24
+        var duration := 0.42 if String(burst.get("kind", "arcane")) == "frost" else 0.24
+        var progress := 1.0 - float(burst["life"]) / duration
         var radius := 7.0 + progress * 24.0
-        draw_arc(bp,radius,0.0,TAU,20,Color(0.55,0.88,1.0,1.0-progress),2.5,true)
+        var burst_color := Color("#a4edff") if String(burst.get("kind", "arcane")) == "frost" else Color(0.55,0.88,1.0)
+        draw_arc(bp,radius,0.0,TAU,20,Color(burst_color,1.0-progress),2.5,true)
         for spark in range(6):
             var angle := float(spark) * TAU / 6.0 + progress * 1.8
             var point := bp + Vector2(cos(angle),sin(angle)) * radius
             draw_circle(point,2.2*(1.0-progress),Color("#b8f4ff",1.0-progress))
 
+    # Nova ring expands around the blast point.
+    for burst in nova_bursts:
+        var progress := 1.0 - float(burst["life"]) / 0.62
+        var bp: Vector2 = burst["pos"]
+        var radius := 18.0 + progress * 155.0
+        draw_arc(bp,radius,0.0,TAU,48,Color(0.45,0.82,1.0,1.0-progress),5.0,true)
+        draw_circle(bp,18.0*(1.0-progress),Color(0.60,0.91,1.0,0.24*(1.0-progress)))
     # brief cast flash and ground rune
     if cast_timer > 0.0:
         var glow := 0.5 + 0.5 * sin(anim_time * 35.0)
