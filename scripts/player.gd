@@ -81,7 +81,8 @@ func _physics_process(delta: float) -> void:
 
     for i in range(spell_orbs.size() - 1, -1, -1):
         var orb: Dictionary = spell_orbs[i]
-        orb["pos"] = Vector2(orb["pos"]) + Vector2(float(orb["dir"]) * 760.0 * delta, 0.0)
+        var orb_pos: Vector2 = orb["pos"]
+        orb["pos"] = orb_pos + Vector2(float(orb["dir"]) * 760.0 * delta, 0.0)
         orb["life"] = float(orb["life"]) - delta
         spell_orbs[i] = orb
         if float(orb["life"]) <= 0.0:
@@ -122,7 +123,7 @@ func _draw() -> void:
     draw_set_transform(Vector2(0, bob), 0, Vector2(float(facing), 1))
     # soft magical ground shadow
     draw_set_transform(Vector2(0, 2), 0, Vector2(float(facing), 1))
-    draw_ellipse(Vector2(0, 0), Vector2(24, 5), Color(0.01, 0.02, 0.06, 0.36))
+    draw_colored_polygon(PackedVector2Array([Vector2(-24,0),Vector2(-18,-3),Vector2(-9,-5),Vector2(9,-5),Vector2(18,-3),Vector2(24,0),Vector2(18,3),Vector2(9,5),Vector2(-9,5),Vector2(-18,3)]), Color(0.01,0.02,0.06,0.36))
     draw_set_transform(Vector2(0, bob), 0, Vector2(float(facing), 1))
 
     # flowing split cloak, with animated hem
