@@ -23,6 +23,8 @@ func _build_ui() -> void:
     _make_button("JUMP", "jump", Vector2(-205,-135), Color(0.25,0.65,0.85,0.72))
     _make_button("HIT", "attack", Vector2(-105,-85), Color(0.83,0.56,0.25,0.78))
     _make_button("DASH", "dodge", Vector2(-105,-185), Color(0.48,0.42,0.75,0.78))
+    _make_button("ICE", "frost_spell", Vector2(-300,-120), Color(0.35,0.78,0.95,0.82))
+    _make_button("NOVA", "nova_spell", Vector2(-300,-215), Color(0.55,0.45,0.88,0.82))
 
 func _make_button(label_text: String, action: String, offset: Vector2, tint: Color) -> void:
     var b := Button.new()
