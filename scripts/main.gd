@@ -88,7 +88,7 @@ func _build_hud() -> void:
     magic_label.position = Vector2(28,88)
     magic_label.add_theme_font_size_override("font_size", 14)
     magic_label.add_theme_color_override("font_color", Color("#8bdcff"))
-    magic_label.text = "ARCANE BOLT  •  3 HITS TO DEFEAT A FOREST FIEND"
+    magic_label.text = "J: ARCANE  •  Q: FROST  •  E: NOVA"
     ui.add_child(magic_label)
 
 func _update_health(value: int) -> void:
