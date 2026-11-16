@@ -82,8 +82,14 @@ func _build_hud() -> void:
     title.position = Vector2(28,62)
     title.add_theme_font_size_override("font_size", 17)
     title.add_theme_color_override("font_color", Color("#d2dfdc"))
-    title.text = "THE WHISPERING GROVE   •   FIRST PROTOTYPE"
+    title.text = "ENCHANTED VALE   •   MAGE AWAKENING"
     ui.add_child(title)
+    var magic_label := Label.new()
+    magic_label.position = Vector2(28,88)
+    magic_label.add_theme_font_size_override("font_size", 14)
+    magic_label.add_theme_color_override("font_color", Color("#8bdcff"))
+    magic_label.text = "ARCANE BOLT  •  STAFF OF THE BLUE STAR"
+    ui.add_child(magic_label)
 
 func _update_health(value: int) -> void:
     health_label.text = " ".join(PackedStringArray(["♥" if i < value else "♡" for i in range(5)]))
